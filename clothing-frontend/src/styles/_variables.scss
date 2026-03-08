@@ -1,0 +1,49 @@
+// 颜色变量
+$primary-color: #409EFF;
+$success-color: #67C23A;
+$warning-color: #E6A23C;
+$danger-color: #F56C6C;
+$info-color: #909399;
+
+// 背景色
+$bg-color: #f5f7fa;
+$sidebar-bg: #fff;
+$content-bg: transparent;
+
+// 文本色
+$text-color: #303133;
+$text-color-secondary: #606266;
+$text-color-light: #909399;
+
+// 边框色
+$border-color: #ebefef;
+$border-radius: 8px;
+
+// 阴影
+$box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+$box-shadow-hover: 0 4px 16px 0 rgba(0, 0, 0, 0.12);
+
+// 布局
+$sidebar-width: 240px;
+$sidebar-width-sm: 200px;
+$content-padding: 24px;
+$content-padding-sm: 16px;
+
+// 字体
+$font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+$font-size-base: 14px;
+$font-size-lg: 16px;
+$font-size-sm: 12px;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-xxl: 24px;
+
+// 过渡
+$transition-duration: 0.3s;
+$transition-timing-function: ease;
+$transition: all $transition-duration $transition-timing-function;

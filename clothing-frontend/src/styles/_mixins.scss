@@ -1,0 +1,126 @@
+// 过渡效果
+@mixin transition($property: all, $duration: $transition-duration, $timing-function: $transition-timing-function) {
+  transition: $property $duration $timing-function;
+}
+
+// 边框圆角
+@mixin border-radius($radius: $border-radius) {
+  border-radius: $radius;
+}
+
+// 阴影
+@mixin box-shadow($shadow: $box-shadow) {
+  box-shadow: $shadow;
+}
+
+// 响应式布局
+@mixin responsive($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (max-width: 768px) {
+      @content;
+    }
+  } @else if $breakpoint == 'md' {
+    @media (max-width: 1200px) {
+      @content;
+    }
+  } @else if $breakpoint == 'lg' {
+    @media (max-width: 1920px) {
+      @content;
+    }
+  }
+}
+
+// 弹性布局
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// 卡片样式
+@mixin card {
+  background-color: $sidebar-bg;
+  @include border-radius;
+  @include box-shadow;
+  @include transition;
+  
+  &:hover {
+    @include box-shadow($box-shadow-hover);
+  }
+}
+
+// 侧边栏菜单项
+@mixin menu-item {
+  height: 56px;
+  line-height: 56px;
+  margin: 0 12px;
+  @include border-radius;
+  
+  &:hover {
+    background-color: #ecf5ff;
+  }
+  
+  &.is-active {
+    background-color: #ecf5ff;
+  }
+  
+  .el-icon {
+    margin-right: 12px;
+    font-size: 18px;
+  }
+}
+
+// 按钮样式
+@mixin button {
+  @include border-radius;
+  @include transition;
+  
+  .el-icon {
+    margin-right: 8px;
+  }
+}
+
+// 表单样式
+@mixin form-item {
+  margin-bottom: 16px;
+  
+  .el-form-item__label {
+    font-weight: 600;
+    color: $text-color;
+  }
+}
+
+// 表格样式
+@mixin table {
+  @include border-radius;
+  overflow: hidden;
+  
+  .el-table__header-wrapper {
+    .el-table__header {
+      th {
+        background-color: #f9fafc;
+        font-weight: 600;
+        color: $text-color;
+      }
+    }
+  }
+  
+  .el-table__body-wrapper {
+    .el-table__row {
+      &:hover {
+        background-color: $bg-color;
+      }
+    }
+  }
+}

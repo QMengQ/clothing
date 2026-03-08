@@ -1,0 +1,200 @@
+@import './_variables.scss';
+@import './_mixins.scss';
+
+// 全局重置
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-family;
+  font-size: $font-size-base;
+  color: $text-color;
+  background-color: $bg-color;
+  line-height: 1.5;
+}
+
+// 容器样式
+.container {
+  min-height: 100vh;
+  background-color: $bg-color;
+}
+
+// 布局样式
+.layout {
+  min-height: 100vh;
+  display: flex;
+}
+
+// 侧边栏样式
+.sidebar {
+  background-color: $sidebar-bg;
+  @include box-shadow;
+  padding: $spacing-xl 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  width: $sidebar-width;
+  
+  @include responsive('sm') {
+    width: $sidebar-width-sm !important;
+  }
+  
+  .sidebar-header {
+    @include flex-center;
+    padding: 0 $spacing-xl $spacing-xl;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: $spacing-xl;
+    
+    .user-info {
+      margin-left: $spacing-md;
+      
+      .user-name {
+        font-size: $font-size-lg;
+        font-weight: 600;
+        color: $text-color;
+        margin: 0 0 $spacing-xs;
+      }
+      
+      .user-role {
+        font-size: $font-size-sm;
+        color: $text-color-light;
+        margin: 0;
+      }
+    }
+  }
+  
+  .menu {
+    border-right: none;
+    
+    .el-menu-item {
+      @include menu-item;
+    }
+  }
+  
+  .sidebar-footer {
+    padding: $spacing-xl;
+    margin-top: auto;
+    
+    .logout-button {
+      width: 100%;
+      @include flex-center;
+      
+      .el-icon {
+        margin-right: $spacing-sm;
+      }
+    }
+  }
+}
+
+// 内容区域样式
+.content {
+  padding: $content-padding;
+  flex: 1;
+  
+  @include responsive('md') {
+    padding: $content-padding-sm;
+  }
+  
+  @include responsive('sm') {
+    padding: $content-padding-sm;
+  }
+  
+  .main-content {
+    background-color: $content-bg;
+    padding: 0;
+  }
+}
+
+// 卡片样式
+.card {
+  @include card;
+  overflow: hidden;
+  
+  .card-header {
+    @include flex-center;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: $text-color;
+    
+    .header-icon {
+      margin-right: $spacing-md;
+      font-size: 18px;
+      color: $primary-color;
+    }
+    
+    .item-count {
+      margin-left: $spacing-md;
+    }
+  }
+}
+
+// 表单样式
+.form {
+  margin-top: $spacing-lg;
+  
+  .form-actions {
+    @include flex-center;
+    margin-top: $spacing-xxl;
+  }
+  
+  .add-button {
+    min-width: 200px;
+    @include button;
+  }
+}
+
+// 表格样式
+.table {
+  @include table;
+}
+
+// 图片上传样式
+.image-uploader {
+  margin-top: $spacing-sm;
+  
+  .el-upload__tip {
+    margin-top: $spacing-sm;
+    font-size: $font-size-sm;
+    color: $text-color-light;
+  }
+  
+  .el-upload-list {
+    margin-top: $spacing-sm;
+    
+    .el-upload-list__item {
+      @include border-radius;
+      overflow: hidden;
+      
+      .el-upload-list__item-thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+      }
+    }
+  }
+}
+
+// 响应式设计
+@include responsive('sm') {
+  .form {
+    .el-form-item {
+      margin-bottom: $spacing-md;
+    }
+    
+    .form-actions {
+      margin-top: $spacing-xl;
+    }
+    
+    .add-button {
+      width: 100%;
+    }
+  }
+  
+  .table-container {
+    margin-top: $spacing-md;
+  }
+}
