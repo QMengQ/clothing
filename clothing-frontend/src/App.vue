@@ -5,21 +5,6 @@
         <div class="header-content">
           <el-avatar :size="40" :src="logoUrl" />
           <h1 class="app-title">智能衣物管理系统</h1>
-          <div class="header-actions">
-            <el-dropdown v-if="isLoggedIn">
-              <span class="user-info">
-                <el-avatar :size="32" :src="userAvatar" />
-                <span class="username">{{ username }}</span>
-                <el-icon class="el-icon--right"><arrow-down /></el-icon>
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item @click="handleProfile">个人中心</el-dropdown-item>
-                  <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
         </div>
       </el-header>
 
@@ -39,45 +24,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ref } from 'vue'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { ArrowDown } from '@element-plus/icons-vue'
 
-const router = useRouter()
-const isLoggedIn = ref(false)
-const username = ref('')
-const userAvatar = ref('')
 const logoUrl = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20clothing%20management%20system%20logo%2C%20minimalist%2C%20blue%20color%20scheme&image_size=square'
-
-onMounted(() => {
-  checkLoginStatus()
-})
-
-const checkLoginStatus = () => {
-  const token = localStorage.getItem('token')
-  const user = localStorage.getItem('username')
-  if (token) {
-    isLoggedIn.value = true
-    username.value = user || '用户'
-    userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square`
-  }
-}
-
-const handleProfile = () => {
-  // 跳转到个人中心
-  router.push('/user/profile')
-}
-
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('role')
-  localStorage.removeItem('username')
-  isLoggedIn.value = false
-  ElMessage.success('退出登录成功')
-  router.push('/')
-}
 </script>
 
   <style lang="scss">
@@ -116,31 +66,7 @@ const handleLogout = () => {
   flex: 1;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
 
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 12px;
-  border-radius: $border-radius;
-  transition: $transition;
-  
-  &:hover {
-    background-color: $bg-color;
-  }
-}
-
-.username {
-  font-size: 14px;
-  font-weight: 500;
-  color: $text-color-secondary;
-}
 
 .app-main {
   flex: 1;
@@ -186,8 +112,6 @@ const handleLogout = () => {
     margin: 16px auto;
   }
   
-  .username {
-    display: none;
-  }
+
 }
 </style>

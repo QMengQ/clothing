@@ -341,8 +341,8 @@
                     <el-image
                       v-for="(url, index) in scope.row.imageUrls.split(',')"
                       :key="index"
-                      :src="`http://localhost:8081/uploads/${url}`"
-                      :preview-src-list="[`http://localhost:8081/uploads/${url}`]"
+                      :src="`http://localhost:8080/uploads/${url}`"
+                      :preview-src-list="[`http://localhost:8080/uploads/${url}`]"
                       style="width: 50px; height: 50px; margin-right: 5px;"
                     />
                   </div>
@@ -917,7 +917,7 @@ const editRecycle = (item) => {
     const imageUrls = item.imageUrls.split(',')
     imageUrls.forEach(url => {
       editImages.value.push({
-        url: `http://localhost:8081/uploads/${url}`,
+        url: `http://localhost:8080/uploads/${url}`,
         name: url
       })
     })
@@ -1017,7 +1017,7 @@ const moveToTrade = (item) => {
     condition: item.clothingCondition,
     price: item.price || 0,
     description: item.notes || '',
-    images: item.imageUrls ? item.imageUrls.split(',').map(url => `http://localhost:8081/uploads/${url}`) : []
+    images: item.imageUrls ? item.imageUrls.split(',').map(url => `http://localhost:8080/uploads/${url}`) : []
   }
   
   // 存储到 localStorage 中，以便在交易页面获取

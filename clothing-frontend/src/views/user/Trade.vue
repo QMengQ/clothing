@@ -712,12 +712,12 @@ const loadUserData = async () => {
       const user = localStorage.getItem('username')
       username.value = user || '用户'
     }
-    userAvatar.value = `https://picsum.photos/seed/${username.value}/100/100`
+   userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square`
   } catch (error) {
     console.error('加载用户数据失败:', error)
     const user = localStorage.getItem('username')
     username.value = user || '用户'
-    userAvatar.value = `https://picsum.photos/seed/user/100/100`
+   userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square`
   }
 }
 
@@ -841,7 +841,7 @@ const loadClothingList = async () => {
         title: item.title || item.name || '未命名服装',
         description: item.description || item.notes || '暂无描述',
         // 为没有image的服装添加默认图片，检查是否包含lf-cdn.trae.com.cn URL
-        image: item.imageUrls ? (item.imageUrls.includes('lf-cdn.trae.com.cn') ? `https://picsum.photos/seed/clothing${item.id}/800/600` : `http://localhost:8081/uploads/${item.imageUrls.split(',')[0]}`) : `https://picsum.photos/seed/clothing${item.id}/800/600`,
+        image: item.imageUrls ? (item.imageUrls.includes('lf-cdn.trae.com.cn') ? `https://picsum.photos/seed/clothing${item.id}/800/600` : `http://localhost:8080/uploads/${item.imageUrls.split(',')[0]}`) : `https://picsum.photos/seed/clothing${item.id}/800/600`,
         // 为没有category的服装添加默认分类
         category: item.category || item.type || '其他',
         // 为没有condition的服装添加默认状况
@@ -889,7 +889,7 @@ const loadMyClothingList = async () => {
       title: item.title || item.name || '未命名服装',
       description: item.description || item.notes || '暂无描述',
       // 为没有image的服装添加默认图片，检查是否包含lf-cdn.trae.com.cn URL
-      image: item.imageUrls ? (item.imageUrls.includes('lf-cdn.trae.com.cn') ? `https://picsum.photos/seed/clothing${item.id}/800/600` : `http://localhost:8081/uploads/${item.imageUrls.split(',')[0]}`) : `https://picsum.photos/seed/clothing${item.id}/800/600`,
+      image: item.imageUrls ? (item.imageUrls.includes('lf-cdn.trae.com.cn') ? `https://picsum.photos/seed/clothing${item.id}/800/600` : `http://localhost:8080/uploads/${item.imageUrls.split(',')[0]}`) : `https://picsum.photos/seed/clothing${item.id}/800/600`,
       // 为没有category的服装添加默认分类
       category: item.category || item.type || '其他',
       // 为没有condition的服装添加默认状况

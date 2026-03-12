@@ -10,6 +10,7 @@ import Recycle from '../views/user/Recycle.vue'
 import Trade from '../views/user/Trade.vue'
 import AllClothing from '../views/admin/AllClothing.vue'
 import ReviewClothing from '../views/admin/ReviewClothing.vue'
+import UserManage from '../views/admin/UserManage.vue'
 
 
 const routes = [
@@ -23,6 +24,7 @@ const routes = [
   { path: '/user/trade', component: Trade },
   { path: '/admin/allClothing', component: AllClothing },
   { path: '/admin/review', component: ReviewClothing },
+  { path: '/admin/users', component: UserManage },
   
 ]
 

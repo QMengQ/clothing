@@ -14,23 +14,42 @@
           <Card 
             title="用户管理" 
             icon="User"
+            :badge="userList.length"
+            class="user-list-card"
           >
-            <el-table 
-              :data="list" 
-              v-loading="loading"
-              style="width: 100%"
-              stripe
-              border
-              :empty-text="emptyText"
-            >
-              <el-table-column prop="username" label="用户名" min-width="120" />
-              <el-table-column prop="role" label="角色" min-width="100" />
-              <el-table-column label="操作" min-width="100">
-                <template #default="scope">
-                  <el-button type="danger" @click="del(scope.row.id)">删除</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
+            <div class="table-container">
+              <el-table 
+                :data="userList" 
+                v-loading="loading"
+                style="width: 100%"
+                stripe
+                border
+                :empty-text="emptyText"
+              >
+                <el-table-column prop="id" label="ID" min-width="80" />
+                <el-table-column prop="username" label="用户名" min-width="120" />
+                <el-table-column prop="role" label="角色" min-width="100">
+                  <template #default="scope">
+                    <el-tag :type="scope.row.role === 'ADMIN' ? 'danger' : 'success'">
+                      {{ scope.row.role === 'ADMIN' ? '管理员' : '普通用户' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" min-width="120">
+                  <template #default="scope">
+                    <el-button 
+                      type="danger" 
+                      size="small" 
+                      @click="deleteUser(scope.row)"
+                      :disabled="scope.row.role === 'ADMIN'"
+                    >
+                      <el-icon><Delete /></el-icon>
+                      删除
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
           </Card>
         </el-main>
       </el-container>
@@ -41,7 +60,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { User, Delete } from '@element-plus/icons-vue'
 import request from '../../utils/request'
 import Sidebar from '../../components/Sidebar.vue'
 import Card from '../../components/Card.vue'
@@ -50,15 +70,20 @@ const router = useRouter()
 const route = useRoute()
 const username = ref('管理员')
 const userAvatar = ref('')
-const list = ref([])
+
+const userList = ref([])
 const loading = ref(false)
 
 const menuItems = [
   { index: '/admin/home', icon: 'House', title: '首页' },
   { index: '/admin/users', icon: 'User', title: '用户管理' },
-  { index: '/admin/clothing', icon: 'ShoppingBag', title: '衣物总览' },
-  { index: '/admin/stats', icon: 'DataAnalysis', title: '系统统计' }
+  { index: '/admin/allClothing', icon: 'ShoppingBag', title: '衣物总览' },
+  { index: '/admin/review', icon: 'View', title: '回收审核' }
 ]
+
+const activeMenu = computed(() => {
+  return route.path
+})
 
 const emptyText = computed(() => {
   return loading.value ? '加载中...' : '暂无用户数据'
@@ -66,7 +91,7 @@ const emptyText = computed(() => {
 
 onMounted(() => {
   loadUserData()
-  load()
+  loadUsers()
 })
 
 const loadUserData = () => {
@@ -75,26 +100,46 @@ const loadUserData = () => {
   userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=admin%20avatar%2C%20minimalist%2C%20professional%20look&image_size=square`
 }
 
-const load = () => {
+const loadUsers = () => {
   loading.value = true
   request.get('/admin/users').then(res => {
-    list.value = res.data || []
+    userList.value = res.data || []
   }).catch(error => {
     console.error('加载用户列表失败:', error)
     ElMessage.error('加载用户列表失败')
-    list.value = []
+    userList.value = []
   }).finally(() => {
     loading.value = false
   })
 }
 
-const del = (id) => {
-  request.delete('/admin/user/' + id).then(() => {
-    ElMessage.success('删除成功')
-    load()
-  }).catch(error => {
-    console.error('删除用户失败:', error)
-    ElMessage.error('删除用户失败')
+const deleteUser = (user) => {
+  if (user.role === 'ADMIN') {
+    ElMessage.warning('不能删除管理员用户')
+    return
+  }
+  
+  ElMessageBox.confirm(
+    `确定要删除用户 ${user.username} 吗？`,
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(() => {
+    loading.value = true
+    request.delete(`/admin/user/${user.id}`).then(() => {
+      ElMessage.success('用户删除成功')
+      loadUsers()
+    }).catch(error => {
+      console.error('删除用户失败:', error)
+      ElMessage.error('删除用户失败')
+    }).finally(() => {
+      loading.value = false
+    })
+  }).catch(() => {
+    // 取消删除
   })
 }
 
@@ -108,5 +153,9 @@ const logout = () => {
 <style lang="scss" scoped>
 .user-manage-container {
   min-height: 100vh;
+}
+
+.table-container {
+  margin-top: 16px;
 }
 </style>

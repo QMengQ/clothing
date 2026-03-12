@@ -164,9 +164,8 @@ const userAvatar = ref('')
 const menuItems = [
   { index: '/admin/home', icon: 'House', title: '首页' },
   { index: '/admin/users', icon: 'User', title: '用户管理' },
-  { index: '/admin/clothing', icon: 'ShoppingBag', title: '衣物总览' },
-  { index: '/admin/review', icon: 'View', title: '服装审核' },
-  { index: '/admin/stats', icon: 'DataAnalysis', title: '系统统计' }
+  { index: '/admin/allClothing', icon: 'ShoppingBag', title: '衣物总览' },
+  { index: '/admin/review', icon: 'View', title: '回收审核' }
 ]
 
 // 分页和筛选
@@ -192,7 +191,7 @@ onMounted(() => {
 const loadUserData = () => {
   const user = localStorage.getItem('username')
   username.value = user || '管理员'
-  userAvatar.value = `https://picsum.photos/seed/admin${Date.now()}/100/100`
+  userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=admin%20avatar%2C%20minimalist%2C%20professional%20look&image_size=square`
 }
 
 const loadPendingClothing = async () => {

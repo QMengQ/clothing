@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   datasource:
@@ -18,4 +18,4 @@ spring:
 # 文件上传配置
 upload:
   dir: e:/workbase/clothing/uploads
-  base-url: http://localhost:8081/uploads
+  base-url: http://localhost:8080/uploads
