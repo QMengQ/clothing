@@ -100,37 +100,34 @@
                 <el-col :span="24">
                   <el-form-item label="衣物图片" prop="image">
                     <el-upload
-                      class="image-uploader"
-                      action="#"
+                      class="upload-demo"
+                      :action="''"
                       :auto-upload="false"
                       :on-change="handleImageChange"
                       :on-remove="handleImageRemove"
-                      :file-list="fileList"
-                      :limit="1"
-                      :accept="'.jpg,.jpeg,.png,.gif'"
                       :before-upload="beforeUpload"
+                      :limit="1"
+                      :on-exceed="handleExceed"
+                      list-type="picture-card"
+                      :file-list="fileList"
                     >
-                      <el-button size="large" :disabled="loading">
-                        <el-icon><Plus /></el-icon>
-                        上传图片
-                      </el-button>
-                      <template #tip>
-                        <div class="el-upload__tip">
-                          请上传JPG、PNG、GIF格式的图片，大小不超过2MB
-                        </div>
-                      </template>
+                      <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
                       <template #file="{ file }">
-                        <div class="upload-file-info">
-                          <el-image
-                            :src="file.url"
-                            fit="cover"
-                            style="width: 80px; height: 80px; border-radius: 4px"
-                          />
-                          <div class="file-name">{{ file.name }}</div>
-                          <div class="file-size">{{ formatFileSize(file.size || file.raw?.size) }}</div>
+                        <div class="image-preview">
+                          <img :src="file.url" class="preview-image" />
+                          <div class="image-actions">
+                            <el-button size="small" type="danger" circle @click.stop="handleImageRemove(file)">
+                              <el-icon><Delete /></el-icon>
+                            </el-button>
+                          </div>
                         </div>
                       </template>
                     </el-upload>
+                    <template #tip>
+                      <div class="el-upload__tip">
+                        请上传JPG、PNG、GIF格式的图片，大小不超过2MB
+                      </div>
+                    </template>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -197,15 +194,21 @@
               <el-table-column prop="location" label="位置" min-width="120" />
               <el-table-column prop="purchaseDate" label="购买时间" min-width="120" />
               <el-table-column prop="lastWearDate" label="最后穿戴" min-width="120" />
-              <el-table-column label="操作" min-width="150" fixed="right">
+              <el-table-column label="操作" min-width="200" fixed="right">
                 <template #default="scope">
                   <el-button 
                     type="primary" 
                     @click="edit(scope.row)" 
                     size="small"
-                    style="margin-right: 8px"
                   >
                     编辑
+                  </el-button>
+                  <el-button 
+                    type="primary" 
+                    @click="moveToRecycle(scope.row)" 
+                    size="small"
+                  >
+                    转到回收
                   </el-button>
                   <el-button 
                     type="danger" 
@@ -315,37 +318,32 @@
           <el-col :span="24">
             <el-form-item label="衣物图片" prop="image">
               <el-upload
-                class="image-uploader"
-                action="#"
+                class="upload-demo"
+                :action="''"
                 :auto-upload="false"
                 :on-change="handleEditImageChange"
                 :on-remove="handleEditImageRemove"
-                :file-list="editFileList"
-                :limit="1"
-                :accept="'.jpg,.jpeg,.png,.gif'"
                 :before-upload="beforeUpload"
+                :limit="1"
+                :on-exceed="handleExceed"
+                list-type="picture-card"
+                :file-list="editFileList"
               >
-                <el-button size="large" :disabled="editLoading">
-                  <el-icon><Plus /></el-icon>
-                  上传图片
-                </el-button>
-                <template #tip>
-                  <div class="el-upload__tip">
-                    请上传JPG、PNG、GIF格式的图片，大小不超过2MB
-                  </div>
-                </template>
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
                 <template #file="{ file }">
-                  <div class="upload-file-info">
-                    <el-image
-                      :src="file.url"
-                      fit="cover"
-                      style="width: 80px; height: 80px; border-radius: 4px"
-                    />
-                    <div class="file-name">{{ file.name }}</div>
-                    <div class="file-size">{{ formatFileSize(file.size || file.raw?.size) }}</div>
+                  <div class="image-preview">
+                    <img :src="file.url" class="preview-image" />
+                    <div class="image-actions">
+                      <el-button size="small" type="danger" circle @click.stop="handleEditImageRemove(file)">
+                        <el-icon><Delete /></el-icon>
+                      </el-button>
+                    </div>
                   </div>
                 </template>
               </el-upload>
+              <div class="el-upload__tip" style="margin-top: 8px">
+                请上传JPG、PNG、GIF格式的图片，大小不超过2MB
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -364,7 +362,7 @@
 import { reactive, onMounted, ref, computed, onActivated } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Collection, Delete, House, ShoppingBag, MapLocation, Refresh } from '@element-plus/icons-vue'
+import { Plus, Collection, Delete, House, ShoppingBag, MapLocation, Refresh, Message } from '@element-plus/icons-vue'
 import request from '../../utils/request'
 import { clothingQueryService } from '../../utils/queryService'
 import Sidebar from '../../components/Sidebar.vue'
@@ -381,7 +379,10 @@ const menuItems = [
   { index: '/user/clothing', icon: 'ShoppingBag', title: '衣物管理' },
   { index: '/user/location', icon: 'MapLocation', title: '收纳管理' },
   { index: '/user/recycle', icon: 'Refresh', title: '衣物回收' },
-  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' }
+  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' },
+  { index: '/user/orders', icon: 'ShoppingBag', title: '订单管理' },
+  { index: '/user/messages', icon: 'Message', title: '消息中心' },
+  { index: '/user/idle-alerts', icon: 'Warning', title: '闲置预警' }
 ]
 
 const form = reactive({
@@ -605,9 +606,9 @@ const handleImageChange = (file, fileList) => {
   }
 }
 
-const handleImageRemove = () => {
+const handleImageRemove = (file, fileList) => {
   imageFile.value = null
-  fileList.value = []
+  fileList.value = fileList || []
 }
 
 const beforeUpload = (file) => {
@@ -777,9 +778,11 @@ const edit = (clothing) => {
   
   // 如果有图片，添加到文件列表
   if (clothing.image) {
+    const imageUrl = clothing.image.includes('http') ? clothing.image : `http://localhost:8080/uploads/${clothing.image}`
     editFileList.value = [{
-      name: 'image.jpg',
-      url: clothing.image.includes('http') ? clothing.image : `http://localhost:8080/uploads/${clothing.image}`
+      name: '当前图片',
+      url: imageUrl,
+      uid: Date.now().toString()
     }]
   }
   
@@ -801,10 +804,15 @@ const handleEditImageChange = (file, fileList) => {
 }
 
 // 处理编辑时的图片移除
-const handleEditImageRemove = () => {
+const handleEditImageRemove = (file, fileList) => {
   editImageFile.value = null
-  editFileList.value = []
+  editFileList.value = fileList || []
   editForm.image = ''
+}
+
+// 处理超出限制
+const handleExceed = () => {
+  ElMessage.error('最多只能上传 1 张照片！')
 }
 
 // 确认修改
@@ -836,23 +844,37 @@ const confirmEdit = async () => {
     
     editLoading.value = true
     
-    // 准备请求数据
-    const requestData = {
-      id: editForm.id,
-      name: editForm.name.trim(),
-      type: editForm.type.trim(),
-      size: editForm.size.trim(),
-      season: editForm.season,
-      status: editForm.status,
-      location: editForm.location.trim(),
-      purchaseDate: editForm.purchaseDate,
-      lastWearDate: editForm.lastWearDate
+    // 准备FormData
+    const formData = new FormData()
+    formData.append('id', editForm.id)
+    formData.append('name', editForm.name.trim())
+    formData.append('type', editForm.type.trim())
+    formData.append('size', editForm.size.trim())
+    formData.append('season', editForm.season)
+    formData.append('status', editForm.status)
+    formData.append('location', editForm.location.trim())
+    formData.append('purchaseDate', editForm.purchaseDate)
+    
+    if (editForm.lastWearDate) {
+      formData.append('lastWearDate', editForm.lastWearDate)
+    }
+    
+    if (editImageFile.value) {
+      formData.append('image', editImageFile.value)
     }
 
-    // 尝试使用POST方法更新衣物，使用更通用的端点
-    await request.post(`/clothing/save`, requestData)
+    // 使用新的更新API
+    await request.post('/clothing/update', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
     ElMessage.success('修改成功')
     editDialogVisible.value = false
+    
+    // 重置文件列表
+    editFileList.value = []
+    editImageFile.value = null
     
     // 重新加载列表
     await load()
@@ -864,6 +886,37 @@ const confirmEdit = async () => {
   } finally {
     editLoading.value = false
   }
+}
+
+// 转到回收页面
+const moveToRecycle = (item) => {
+  // 准备要传递到回收页面的数据
+  const recycleData = {
+    clothingType: item.type,
+    clothingCondition: item.status,
+    size: item.size,
+    brand: '',
+    material: '',
+    notes: `从衣物管理导入：${item.name}`,
+    qualityRating: item.status === '全新' ? 5 : 
+                     item.status === '良好' ? 4 : 
+                     item.status === '一般' ? 3 : 2,
+    recycleType: '回收',
+    price: 0,
+    address: item.location || '',
+    latitude: null,
+    longitude: null,
+    image: item.image
+  }
+  
+  // 存储到 localStorage 中，以便在回收页面获取
+  localStorage.setItem('clothingToRecycleData', JSON.stringify(recycleData))
+  
+  // 跳转到回收页面
+  router.push('/user/recycle')
+  
+  // 显示提示信息
+  ElMessage.success('已准备将衣物转移到回收页面')
 }
 </script>
 
@@ -896,6 +949,33 @@ const confirmEdit = async () => {
     font-size: 12px;
     color: #909399;
   }
+}
+
+.upload-demo {
+  margin-bottom: 20px;
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px;
 }
 
 /* 响应式设计 */

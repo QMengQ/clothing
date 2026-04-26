@@ -148,9 +148,8 @@
                     <el-col :span="12">
                       <el-form-item prop="recycleType" :rules="[{ required: true, message: '请选择回收类型', trigger: 'change' }]">
                         <el-select v-model="form.recycleType" placeholder="回收类型" size="large">
-                          <el-option label="捐赠" value="捐赠" />
+                          <el-option label="交易" value="交易" />
                           <el-option label="回收" value="回收" />
-                          <el-option label="交换" value="交换" />
                         </el-select>
                       </el-form-item>
                     </el-col>
@@ -264,9 +263,8 @@
                 <el-col :span="8">
                   <el-form-item label="回收类型">
                     <el-select v-model="searchForm.recycleType" placeholder="请选择回收类型">
-                      <el-option label="捐赠" value="捐赠" />
+                      <el-option label="交易" value="交易" />
                       <el-option label="回收" value="回收" />
-                      <el-option label="交换" value="交换" />
                     </el-select>
                   </el-form-item>
                 </el-col>
@@ -458,9 +456,8 @@
           <el-col :span="12">
             <el-form-item prop="recycleType" :rules="[{ required: true, message: '请选择回收类型', trigger: 'change' }]">
               <el-select v-model="editForm.recycleType" placeholder="回收类型" size="large">
-                <el-option label="捐赠" value="捐赠" />
+                <el-option label="交易" value="交易" />
                 <el-option label="回收" value="回收" />
-                <el-option label="交换" value="交换" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -543,7 +540,7 @@
 import { reactive, ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Refresh, Goods, Document, ArrowRight, List, House, ShoppingBag, MapLocation, Plus, Delete } from '@element-plus/icons-vue'
+import { Refresh, Goods, Document, ArrowRight, List, House, ShoppingBag, MapLocation, Plus, Delete, Message } from '@element-plus/icons-vue'
 import request from '../../utils/request'
 import { recycleQueryService } from '../../utils/queryService'
 import Sidebar from '../../components/Sidebar.vue'
@@ -640,7 +637,10 @@ const menuItems = [
   { index: '/user/clothing', icon: 'ShoppingBag', title: '衣物管理' },
   { index: '/user/location', icon: 'MapLocation', title: '收纳管理' },
   { index: '/user/recycle', icon: 'Refresh', title: '衣物回收' },
-  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' }
+  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' },
+  { index: '/user/orders', icon: 'ShoppingBag', title: '订单管理' },
+  { index: '/user/messages', icon: 'Message', title: '消息中心' },
+  { index: '/user/idle-alerts', icon: 'Warning', title: '闲置预警' }
 ]
 
 // 加载用户数据
@@ -719,9 +719,44 @@ const getCurrentLocation = () => {
       (position) => {
         form.latitude = position.coords.latitude
         form.longitude = position.coords.longitude
-        form.address = `纬度: ${form.latitude}, 经度: ${form.longitude}`
-        ElMessage.success('获取位置成功')
-        locationLoading.value = false
+        
+        // 使用用户提供的高德地图逆地理编码API获取详细地址
+        const url = `https://restapi.amap.com/v3/geocode/regeo?location=${form.longitude},${form.latitude}&key=be262c006216c542747fce766130cee3`;
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === '1' && data.regeocode) {
+              const addressComponent = data.regeocode.addressComponent;
+              let detailedAddress = '';
+              
+              // 构建详细地址
+              if (addressComponent.province) detailedAddress += addressComponent.province;
+              if (addressComponent.city) detailedAddress += addressComponent.city;
+              if (addressComponent.district) detailedAddress += addressComponent.district;
+              if (addressComponent.township) detailedAddress += addressComponent.township;
+              if (addressComponent.streetNumber && addressComponent.streetNumber.street) detailedAddress += addressComponent.streetNumber.street;
+              if (addressComponent.streetNumber && addressComponent.streetNumber.number) detailedAddress += addressComponent.streetNumber.number;
+              
+              if (detailedAddress) {
+                form.address = detailedAddress;
+                ElMessage.success('获取位置成功');
+              } else {
+                form.address = `纬度: ${form.latitude}, 经度: ${form.longitude}`;
+                ElMessage.warning('获取详细地址失败，仅显示经纬度');
+              }
+            } else {
+              form.address = `纬度: ${form.latitude}, 经度: ${form.longitude}`;
+              ElMessage.warning('获取详细地址失败，仅显示经纬度');
+            }
+            locationLoading.value = false;
+          })
+          .catch(error => {
+            console.error('获取详细地址失败:', error);
+            form.address = `纬度: ${form.latitude}, 经度: ${form.longitude}`;
+            ElMessage.warning('获取详细地址失败，仅显示经纬度');
+            locationLoading.value = false;
+          });
       },
       (error) => {
         console.error('获取位置失败:', error)
@@ -813,9 +848,44 @@ const getEditLocation = () => {
       (position) => {
         editForm.latitude = position.coords.latitude
         editForm.longitude = position.coords.longitude
-        editForm.address = `纬度: ${editForm.latitude}, 经度: ${editForm.longitude}`
-        ElMessage.success('获取位置成功')
-        editLocationLoading.value = false
+        
+        // 使用用户提供的高德地图逆地理编码API获取详细地址
+        const url = `https://restapi.amap.com/v3/geocode/regeo?location=${editForm.longitude},${editForm.latitude}&key=be262c006216c542747fce766130cee3`;
+        
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status === '1' && data.regeocode) {
+              const addressComponent = data.regeocode.addressComponent;
+              let detailedAddress = '';
+              
+              // 构建详细地址
+              if (addressComponent.province) detailedAddress += addressComponent.province;
+              if (addressComponent.city) detailedAddress += addressComponent.city;
+              if (addressComponent.district) detailedAddress += addressComponent.district;
+              if (addressComponent.township) detailedAddress += addressComponent.township;
+              if (addressComponent.streetNumber && addressComponent.streetNumber.street) detailedAddress += addressComponent.streetNumber.street;
+              if (addressComponent.streetNumber && addressComponent.streetNumber.number) detailedAddress += addressComponent.streetNumber.number;
+              
+              if (detailedAddress) {
+                editForm.address = detailedAddress;
+                ElMessage.success('获取位置成功');
+              } else {
+                editForm.address = `纬度: ${editForm.latitude}, 经度: ${editForm.longitude}`;
+                ElMessage.warning('获取详细地址失败，仅显示经纬度');
+              }
+            } else {
+              editForm.address = `纬度: ${editForm.latitude}, 经度: ${editForm.longitude}`;
+              ElMessage.warning('获取详细地址失败，仅显示经纬度');
+            }
+            editLocationLoading.value = false;
+          })
+          .catch(error => {
+            console.error('获取详细地址失败:', error);
+            editForm.address = `纬度: ${editForm.latitude}, 经度: ${editForm.longitude}`;
+            ElMessage.warning('获取详细地址失败，仅显示经纬度');
+            editLocationLoading.value = false;
+          });
       },
       (error) => {
         console.error('获取位置失败:', error)
@@ -1000,7 +1070,40 @@ onMounted(() => {
   loadUserData()
   load()
   loadProgress()
+  // 检查是否有从衣物管理页面传递过来的数据
+  checkClothingToRecycle()
 })
+
+// 检查是否有从衣物管理页面传递过来的数据
+const checkClothingToRecycle = () => {
+  const savedData = localStorage.getItem('clothingToRecycleData')
+  if (savedData) {
+    try {
+      const recycleData = JSON.parse(savedData)
+      // 填充表单数据
+      Object.assign(form, recycleData)
+      // 如果有图片，处理图片
+      if (recycleData.image) {
+        const imageUrl = recycleData.image.includes('http') ? 
+                         recycleData.image : 
+                         `http://localhost:8080/uploads/${recycleData.image}`
+        // 跳转到步骤1（照片上传），让用户可以选择是否重新上传照片
+        currentStep.value = 1
+        ElMessage.info('已导入衣物信息，请继续填写完整')
+      } else {
+        currentStep.value = 1
+        ElMessage.info('已导入衣物信息，请继续填写完整')
+      }
+      // 清除 localStorage 中的数据
+      localStorage.removeItem('clothingToRecycleData')
+      // 保存进度
+      saveProgress()
+    } catch (e) {
+      console.error('解析回收数据失败:', e)
+      localStorage.removeItem('clothingToRecycleData')
+    }
+  }
+}
 
 // 监听表单变化，自动保存进度
 watch(form, saveProgress, { deep: true })

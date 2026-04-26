@@ -31,4 +31,7 @@ public interface RecycleRepository extends JpaRepository<RecycleItem, Long> {
                                          @Param("endDate") LocalDateTime endDate,
                                          @Param("keyword") String keyword);
 
+    // 根据状态查询回收项
+    List<RecycleItem> findByStatus(String status);
+
 }

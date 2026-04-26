@@ -15,11 +15,14 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // 配置CORS
+        // 配置CORS，允许所有来源
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173")
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*").allowCredentials(true);
+                .allowedHeaders("*")
+                .exposedHeaders("Content-Type", "Authorization")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     @Override
@@ -27,7 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
         // 配置JWT拦截器
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/user/login", "/user/register", "/uploads/**");
+                .excludePathPatterns("/user/login", "/user/register", "/uploads/**", "/api/v1/idle-alerts/test-scan/**", "/api/v1/idle-alerts/test-create");
     }
 
     @Override

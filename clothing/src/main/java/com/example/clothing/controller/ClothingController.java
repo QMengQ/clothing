@@ -384,6 +384,140 @@ public class ClothingController {
         }
     }
 
+    @PostMapping("/update")
+    public ResponseEntity<?> updateClothing(
+            @RequestParam("id") Long id,
+            @RequestParam("name") String name,
+            @RequestParam("type") String type,
+            @RequestParam("size") String size,
+            @RequestParam("season") String season,
+            @RequestParam("status") String status,
+            @RequestParam("location") String location,
+            @RequestParam("purchaseDate") String purchaseDate,
+            @RequestParam(value = "lastWearDate", required = false) String lastWearDate,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            HttpServletRequest request){
+
+        try {
+            logger.info("开始处理衣物更新请求，ID: {}", id);
+            Long userId = (Long) request.getAttribute("userId");
+            
+            Clothing clothing = repository.findById(id).orElseThrow(() -> new Exception("衣物不存在"));
+            
+            // 验证用户权限
+            if (!clothing.getUserId().equals(userId)) {
+                logger.error("用户无权修改此衣物");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("{\"error\": \"无权修改此衣物\"}");
+            }
+            
+            // 更新衣物信息
+            clothing.setName(name);
+            clothing.setType(type);
+            clothing.setSize(size);
+            clothing.setSeason(season);
+            clothing.setStatus(status);
+            clothing.setLocation(location);
+            clothing.setPurchaseDate(java.sql.Date.valueOf(purchaseDate));
+            if (lastWearDate != null && !lastWearDate.isEmpty()) {
+                clothing.setLastWearDate(java.sql.Date.valueOf(lastWearDate));
+            }
+
+            // 保存衣物信息
+            logger.info("保存衣物信息");
+            Clothing savedClothing = repository.save(clothing);
+            logger.info("衣物保存成功");
+
+            // 处理图片上传
+            if (image != null && !image.isEmpty()) {
+                logger.info("开始处理图片上传，文件名: {}", image.getOriginalFilename());
+                // 验证文件类型
+                String contentType = image.getContentType();
+                logger.info("图片类型: {}", contentType);
+                if (!contentType.equals("image/jpeg") && !contentType.equals("image/png") && !contentType.equals("image/jpg")) {
+                    logger.error("文件类型不支持: {}", contentType);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("{\"error\": \"文件类型不支持，仅允许上传jpg、jpeg、png格式的图片\"}");
+                }
+
+                // 验证文件大小（5MB）
+                logger.info("图片大小: {} bytes", image.getSize());
+                if (image.getSize() > 5 * 1024 * 1024) {
+                    logger.error("文件大小超过限制: {} bytes", image.getSize());
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("{\"error\": \"文件大小超过限制，单个图片文件大小不超过5MB\"}");
+                }
+
+                // 生成唯一文件名
+                String originalFilename = image.getOriginalFilename();
+                String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String uniqueFilename = UUID.randomUUID().toString() + extension;
+                logger.info("生成唯一文件名: {}", uniqueFilename);
+
+                // 强制使用当前工作目录作为上传目录
+                uploadDir = System.getProperty("user.dir") + "/uploads";
+                File directory = new File(uploadDir);
+                boolean dirCreated = directory.mkdirs();
+                logger.info("使用当前工作目录创建上传目录: {}", uploadDir);
+                logger.info("上传目录创建结果: {}", dirCreated);
+                logger.info("上传目录是否存在: {}", directory.exists());
+
+                // 检查目录是否存在
+                if (!directory.exists()) {
+                    logger.error("无法创建上传目录: {}", uploadDir);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("{\"error\": \"无法创建上传目录\"}");
+                }
+                logger.info("最终上传目录: {}", directory.getAbsolutePath());
+
+                // 保存文件
+                Path filePath = Paths.get(uploadDir, uniqueFilename);
+                logger.info("保存文件到: {}", filePath);
+                Files.write(filePath, image.getBytes());
+                logger.info("文件保存成功");
+
+                // 构建图片URL
+                String imageUrl = uploadBaseUrl + "/" + uniqueFilename;
+                logger.info("图片URL: {}", imageUrl);
+
+                // 创建图片记录
+                Image imageEntity = new Image();
+                imageEntity.setFilename(uniqueFilename);
+                imageEntity.setPath(filePath.toString());
+                imageEntity.setUrl(imageUrl);
+                imageEntity.setSize(image.getSize());
+                imageEntity.setType(contentType);
+                imageEntity.setUploadTime(new Date());
+                imageEntity.setEntityId(savedClothing.getId());
+                imageEntity.setEntityType("clothing");
+                imageEntity.setUserId(userId);
+
+                // 保存图片记录
+                logger.info("保存图片记录");
+                imageRepository.save(imageEntity);
+                logger.info("图片记录保存成功");
+
+                // 更新衣物的图片URL
+                savedClothing.setImage(imageUrl);
+                repository.save(savedClothing);
+                logger.info("衣物图片URL更新成功");
+            } else {
+                logger.info("没有上传新图片，保持原图片");
+            }
+
+            logger.info("衣物更新成功，返回结果");
+            return ResponseEntity.ok(savedClothing);
+        } catch (IOException e) {
+            logger.error("文件上传失败", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"error\": \"文件上传失败\"}");
+        } catch (Exception e) {
+            logger.error("参数错误", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("{\"error\": \"参数错误：\" + e.getMessage()}");
+        }
+    }
+
     @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody SaveRequest request, HttpServletRequest servletRequest) {
         try {

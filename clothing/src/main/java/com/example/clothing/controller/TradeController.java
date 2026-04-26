@@ -17,6 +17,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -223,7 +224,7 @@ public class TradeController {
 
     // 创建交易
     @PostMapping
-    public ResponseEntity<?> createTrade(@RequestBody Trade trade, HttpServletRequest request) {
+    public ResponseEntity<?> createTrade(@RequestBody Map<String, Object> tradeData, HttpServletRequest request) {
         try {
             Long userId = (Long) request.getAttribute("userId");
             if (userId == null) {
@@ -231,18 +232,87 @@ public class TradeController {
                         .body("{\"error\": \"用户未登录\"}");
             }
             
-            // 设置买家ID
+            // 从请求数据中提取信息
+            Long clothingId = ((Number) tradeData.get("clothingId")).longValue();
+            String tradeType = (String) tradeData.get("tradeType");
+            // 处理不同类型的price值
+            Object priceObj = tradeData.get("price");
+            java.math.BigDecimal price;
+            if (priceObj instanceof Double) {
+                price = java.math.BigDecimal.valueOf((Double) priceObj);
+            } else if (priceObj instanceof Integer) {
+                price = java.math.BigDecimal.valueOf((Integer) priceObj);
+            } else if (priceObj instanceof String) {
+                try {
+                    price = new java.math.BigDecimal((String) priceObj);
+                } catch (NumberFormatException e) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("{\"error\": \"价格格式错误\"}");
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("{\"error\": \"价格格式错误\"}");
+            }
+            String paymentMethod = (String) tradeData.get("paymentMethod");
+            
+            // 从服装信息中获取卖家ID
+            TradeClothing clothing = tradeClothingRepository.findById(clothingId).orElse(null);
+            if (clothing == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{\"error\": \"服装不存在\"}");
+            }
+            Long sellerId = clothing.getUserId();
+            
+            // 检查是否是自己的服装
+            if (sellerId.equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("{\"error\": \"不能购买或租赁自己的服装\"}");
+            }
+            
+            // 创建交易对象
+            Trade trade = new Trade();
+            trade.setClothingId(clothingId);
             trade.setBuyerId(userId);
-            // 设置卖家ID（暂时设为1，后续需要从服装信息中获取）
-            trade.setSellerId(1L);
-            // 设置交易状态
+            trade.setSellerId(sellerId);
+            trade.setTradeType(tradeType);
+            trade.setPrice(price);
+            trade.setPaymentMethod(paymentMethod);
             trade.setStatus("pending");
-            // 确保价格不为空
-            if (trade.getPrice() == null) {
-                trade.setPrice(java.math.BigDecimal.ZERO);
+            
+            // 处理地址信息
+            Map<String, Object> address = (Map<String, Object>) tradeData.get("address");
+            if (address != null) {
+                trade.setRecipient((String) address.get("recipient"));
+                trade.setPhone((String) address.get("phone"));
+                trade.setProvince((String) address.get("province"));
+                trade.setCity((String) address.get("city"));
+                trade.setDistrict((String) address.get("district"));
+                trade.setDetailAddress((String) address.get("detailAddress"));
+            }
+            
+            // 处理租赁日期
+            if ("rental".equals(tradeType)) {
+                String rentalStartDateStr = (String) tradeData.get("rentalStartDate");
+                String rentalEndDateStr = (String) tradeData.get("rentalEndDate");
+                if (rentalStartDateStr != null && rentalEndDateStr != null) {
+                    try {
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                        java.util.Date rentalStartDate = sdf.parse(rentalStartDateStr);
+                        java.util.Date rentalEndDate = sdf.parse(rentalEndDateStr);
+                        trade.setRentalStartDate(rentalStartDate);
+                        trade.setRentalEndDate(rentalEndDate);
+                    } catch (Exception e) {
+                        logger.error("日期格式错误", e);
+                    }
+                }
             }
             
             Trade createdTrade = tradeRepository.save(trade);
+            
+            // 更新服装状态为已售出或已租赁
+            clothing.setStatus("sold");
+            tradeClothingRepository.save(clothing);
+            
             return ResponseEntity.ok(createdTrade);
         } catch (Exception e) {
             logger.error("创建交易失败", e);

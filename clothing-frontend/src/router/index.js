@@ -8,6 +8,8 @@ import Clothing from '../views/user/Clothing.vue'
 import Location from '../views/user/Location.vue'
 import Recycle from '../views/user/Recycle.vue'
 import Trade from '../views/user/Trade.vue'
+import Orders from '../views/user/Orders.vue'
+import Messages from '../views/user/Messages.vue'
 import AllClothing from '../views/admin/AllClothing.vue'
 import ReviewClothing from '../views/admin/ReviewClothing.vue'
 import UserManage from '../views/admin/UserManage.vue'
@@ -22,8 +24,12 @@ const routes = [
   { path: '/user/location', component: Location },
   { path: '/user/recycle', component: Recycle },
   { path: '/user/trade', component: Trade },
+  { path: '/user/orders', component: Orders },
+  { path: '/user/messages', component: Messages },
+  { path: '/user/idle-alerts', component: () => import('../views/user/IdleAlerts.vue') },
   { path: '/admin/allClothing', component: AllClothing },
   { path: '/admin/review', component: ReviewClothing },
+  { path: '/admin/reviewRecycle', component: () => import('../views/admin/ReviewRecycle.vue') },
   { path: '/admin/users', component: UserManage },
   
 ]

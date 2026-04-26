@@ -76,7 +76,8 @@ const menuItems = [
   { index: '/admin/home', icon: 'House', title: '首页' },
   { index: '/admin/users', icon: 'User', title: '用户管理' },
   { index: '/admin/allClothing', icon: 'ShoppingBag', title: '衣物总览' },
-  { index: '/admin/review', icon: 'DataAnalysis', title: '回收审核' }
+  { index: '/admin/review', icon: 'View', title: '服装审核' },
+  { index: '/admin/reviewRecycle', icon: 'DataAnalysis', title: '回收审核' }
 ]
 
 const activeMenu = computed(() => {

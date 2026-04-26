@@ -226,7 +226,7 @@
 import { reactive, ref, onMounted, onActivated, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, MapLocation, Delete, House, ShoppingBag, MapLocation as LocationIcon, Refresh } from '@element-plus/icons-vue'
+import { Plus, MapLocation, Delete, House, ShoppingBag, MapLocation as LocationIcon, Refresh, Message } from '@element-plus/icons-vue'
 import request from '../../utils/request'
 import { locationQueryService } from '../../utils/queryService'
 import Sidebar from '../../components/Sidebar.vue'
@@ -243,7 +243,10 @@ const menuItems = [
   { index: '/user/clothing', icon: 'ShoppingBag', title: '衣物管理' },
   { index: '/user/location', icon: 'MapLocation', title: '收纳管理' },
   { index: '/user/recycle', icon: 'Refresh', title: '衣物回收' },
-  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' }
+  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' },
+  { index: '/user/orders', icon: 'ShoppingBag', title: '订单管理' },
+  { index: '/user/messages', icon: 'Message', title: '消息中心' },
+  { index: '/user/idle-alerts', icon: 'Warning', title: '闲置预警' }
 ]
 
 const name = ref('')

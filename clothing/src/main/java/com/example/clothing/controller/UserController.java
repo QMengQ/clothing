@@ -27,7 +27,7 @@ public class UserController {
 
         if(db != null && db.getPassword().equals(user.getPassword())){
             String token = jwtUtils.generateToken(db.getUsername());
-            return Map.of("token", token, "role", db.getRole());
+            return Map.of("token", token, "role", db.getRole(), "id", db.getId(), "username", db.getUsername());
         }
 
         return Map.of("error","用户名或密码错误");

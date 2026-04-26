@@ -1,5 +1,5 @@
 <template>
-  <div class="review-clothing-container">
+  <div class="review-recycle-container">
     <el-container class="admin-layout">
       <Sidebar 
         :username="username"
@@ -12,12 +12,12 @@
       <el-container class="admin-content">
         <el-main class="main-content">
           <Card 
-            title="服装审核管理"
+            title="回收审核管理"
             class="page-header"
           >
             <div class="header-content">
-              <h2>待审核服装列表</h2>
-              <p>审核通过或拒绝用户提交的服装商品</p>
+              <h2>待审核回收列表</h2>
+              <p>审核通过或拒绝用户提交的回收请求</p>
             </div>
           </Card>
 
@@ -27,17 +27,17 @@
               <el-form-item label="搜索">
                 <el-input 
                   v-model="searchQuery" 
-                  placeholder="输入服装标题或ID" 
+                  placeholder="输入回收物品信息" 
                   clearable
-                  @keyup.enter="loadPendingClothing"
+                  @keyup.enter="loadPendingRecycleItems"
                 >
                   <template #append>
-                    <el-button @click="loadPendingClothing"><el-icon><Search /></el-icon></el-button>
+                    <el-button @click="loadPendingRecycleItems"><el-icon><Search /></el-icon></el-button>
                   </template>
                 </el-input>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click="loadPendingClothing">
+                <el-button type="primary" @click="loadPendingRecycleItems">
                   <el-icon><Refresh /></el-icon>
                   刷新列表
                 </el-button>
@@ -45,11 +45,11 @@
             </el-form>
           </Card>
 
-          <!-- 服装列表 -->
-          <Card class="clothing-list-card">
+          <!-- 回收列表 -->
+          <Card class="recycle-list-card">
             <template #header>
               <div class="card-header">
-                <span>待审核服装 ({{ total }})</span>
+                <span>待审核回收 ({{ total }})</span>
                 <el-pagination
                   v-model:current-page="page"
                   v-model:page-size="sizePerPage"
@@ -67,42 +67,41 @@
               <p>加载中...</p>
             </div>
 
-            <div v-else-if="clothingList.length === 0" class="empty-container">
-              <el-empty description="暂无待审核服装" />
+            <div v-else-if="recycleList.length === 0" class="empty-container">
+              <el-empty description="暂无待审核回收" />
             </div>
 
-            <div v-else class="clothing-grid">
+            <div v-else class="recycle-grid">
               <el-card 
-                v-for="item in clothingList" 
+                v-for="item in recycleList" 
                 :key="item.id" 
-                class="clothing-item"
+                class="recycle-item"
                 shadow="hover"
               >
-                <div class="clothing-image">
+                <div class="recycle-image">
                   <el-image 
                     :src="getImageUrl(item.imageUrls)" 
                     fit="cover"
                     class="item-image"
                   />
                 </div>
-                <div class="clothing-info">
-                  <h3 class="clothing-title">{{ item.title }}</h3>
-                  <div class="clothing-meta">
+                <div class="recycle-info">
+                  <h3 class="recycle-title">{{ item.clothingType }}</h3>
+                  <div class="recycle-meta">
                     <span class="meta-item"><strong>ID:</strong> {{ item.id }}</span>
-                    <span class="meta-item"><strong>用户:</strong> {{ item.username }}</span>
-                    <span class="meta-item"><strong>类别:</strong> {{ item.category }}</span>
-                    <span class="meta-item"><strong>尺寸:</strong> {{ item.size }}</span>
+                    <span class="meta-item"><strong>回收类型:</strong> {{ item.recycleType }}</span>
                     <span class="meta-item"><strong>状况:</strong> {{ item.clothingCondition }}</span>
-                    <span class="meta-item"><strong>价格:</strong> ¥{{ item.price }}</span>
-                    <span v-if="item.rentalPrice" class="meta-item"><strong>租赁价:</strong> ¥{{ item.rentalPrice }}/天</span>
+                    <span class="meta-item"><strong>尺码:</strong> {{ item.size }}</span>
+                    <span class="meta-item"><strong>品牌:</strong> {{ item.brand || '无' }}</span>
+                    <span class="meta-item"><strong>价格:</strong> ¥{{ item.price || 0 }}</span>
                   </div>
-                  <div class="clothing-description">{{ item.description }}</div>
-                  <div class="clothing-actions">
-                    <el-button type="primary" @click="approveClothing(item)">
+                  <div class="recycle-description">{{ item.notes || '无备注' }}</div>
+                  <div class="recycle-actions">
+                    <el-button type="primary" @click="approveRecycle(item)">
                       <el-icon><Check /></el-icon>
                       批准
                     </el-button>
-                    <el-button type="danger" @click="showRejectDialog(item)">
+                    <el-button type="danger" @click="rejectRecycle(item)">
                       <el-icon><CircleClose /></el-icon>
                       拒绝
                     </el-button>
@@ -114,37 +113,6 @@
         </el-main>
       </el-container>
     </el-container>
-
-    <!-- 拒绝对话框 -->
-    <el-dialog
-      v-model="rejectDialogVisible"
-      title="拒绝服装"
-      width="500px"
-      destroy-on-close
-    >
-      <el-form :model="rejectForm" ref="rejectFormRef" label-position="top">
-        <el-form-item 
-          prop="rejectionReason" 
-          label="拒绝原因"
-          :rules="[{ required: true, message: '请输入拒绝原因', trigger: 'blur' }]"
-        >
-          <el-input
-            v-model="rejectForm.rejectionReason"
-            type="textarea"
-            placeholder="请输入拒绝原因"
-            :rows="4"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="rejectDialogVisible = false">取消</el-button>
-          <el-button type="danger" @click="rejectClothing" :loading="processingReject">
-            确认拒绝
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -175,18 +143,11 @@ const sizePerPage = ref(10)
 const total = ref(0)
 const searchQuery = ref('')
 const loading = ref(false)
-const clothingList = ref([])
-
-// 拒绝对话框
-const rejectDialogVisible = ref(false)
-const processingReject = ref(false)
-const rejectForm = ref({ rejectionReason: '' })
-const rejectFormRef = ref(null)
-const selectedItem = ref(null)
+const recycleList = ref([])
 
 onMounted(() => {
   loadUserData()
-  loadPendingClothing()
+  loadPendingRecycleItems()
 })
 
 const loadUserData = () => {
@@ -195,22 +156,15 @@ const loadUserData = () => {
   userAvatar.value = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=admin%20avatar%2C%20minimalist%2C%20professional%20look&image_size=square`
 }
 
-const loadPendingClothing = async () => {
+const loadPendingRecycleItems = async () => {
   loading.value = true
   try {
-    const response = await request.get('/api/v1/trade/admin/clothing/pending', {
-      params: {
-        page: page.value,
-        sizePerPage: sizePerPage.value
-      }
-    })
-    
-    const data = response.data
-    clothingList.value = data.data || []
-    total.value = data.total || 0
+    const response = await request.get('/recycle/admin/pending')
+    recycleList.value = response.data || []
+    total.value = recycleList.value.length
   } catch (error) {
-    console.error('加载待审核服装失败:', error)
-    ElMessage.error('加载待审核服装失败')
+    console.error('加载待审核回收失败:', error)
+    ElMessage.error('加载待审核回收失败')
   } finally {
     loading.value = false
   }
@@ -219,17 +173,17 @@ const loadPendingClothing = async () => {
 const handleSizeChange = (newSize) => {
   sizePerPage.value = newSize
   page.value = 1
-  loadPendingClothing()
+  loadPendingRecycleItems()
 }
 
 const handleCurrentChange = (newPage) => {
   page.value = newPage
-  loadPendingClothing()
+  loadPendingRecycleItems()
 }
 
 const getImageUrl = (imageUrls) => {
   if (!imageUrls) {
-    return `https://picsum.photos/seed/clothing${Date.now()}/400/300`
+    return `https://picsum.photos/seed/recycle${Date.now()}/400/300`
   }
   
   const urls = imageUrls.split(',')
@@ -242,47 +196,28 @@ const getImageUrl = (imageUrls) => {
     }
   }
   
-  return `https://picsum.photos/seed/clothing${Date.now()}/400/300`
+  return `https://picsum.photos/seed/recycle${Date.now()}/400/300`
 }
 
-const approveClothing = async (item) => {
+const approveRecycle = async (item) => {
   try {
-    await request.put(`/api/v1/trade/admin/clothing/${item.id}/approve`)
-    ElMessage.success('服装已批准')
-    loadPendingClothing()
+    await request.put(`/recycle/admin/approve/${item.id}`)
+    ElMessage.success('回收已批准')
+    loadPendingRecycleItems()
   } catch (error) {
-    console.error('批准服装失败:', error)
-    ElMessage.error('批准服装失败')
+    console.error('批准回收失败:', error)
+    ElMessage.error('批准回收失败')
   }
 }
 
-const showRejectDialog = (item) => {
-  selectedItem.value = item
-  rejectForm.value = { rejectionReason: '' }
-  rejectDialogVisible.value = true
-}
-
-const rejectClothing = async () => {
-  if (!selectedItem.value) {
-    return
-  }
-  
-  processingReject.value = true
+const rejectRecycle = async (item) => {
   try {
-    await request.put(`/api/v1/trade/admin/clothing/${selectedItem.value.id}/reject`, null, {
-      params: {
-        rejectionReason: rejectForm.value.rejectionReason
-      }
-    })
-    
-    ElMessage.success('服装已拒绝')
-    rejectDialogVisible.value = false
-    loadPendingClothing()
+    await request.put(`/recycle/admin/reject/${item.id}`)
+    ElMessage.success('回收已拒绝')
+    loadPendingRecycleItems()
   } catch (error) {
-    console.error('拒绝服装失败:', error)
-    ElMessage.error('拒绝服装失败')
-  } finally {
-    processingReject.value = false
+    console.error('拒绝回收失败:', error)
+    ElMessage.error('拒绝回收失败')
   }
 }
 
@@ -326,7 +261,7 @@ const logout = () => {
   flex-wrap: wrap;
 }
 
-.clothing-list-card {
+.recycle-list-card {
   margin-bottom: 40px;
 }
 
@@ -355,14 +290,14 @@ const logout = () => {
   }
 }
 
-.clothing-grid {
+.recycle-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
   margin-top: 16px;
 }
 
-.clothing-item {
+.recycle-item {
   transition: all 0.3s ease;
   
   &:hover {
@@ -370,7 +305,7 @@ const logout = () => {
   }
 }
 
-.clothing-image {
+.recycle-image {
   position: relative;
   margin-bottom: 16px;
   
@@ -381,8 +316,8 @@ const logout = () => {
   }
 }
 
-.clothing-info {
-  .clothing-title {
+.recycle-info {
+  .recycle-title {
     font-size: 16px;
     font-weight: 600;
     color: #303133;
@@ -390,7 +325,7 @@ const logout = () => {
     line-height: 1.4;
   }
   
-  .clothing-meta {
+  .recycle-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -405,7 +340,7 @@ const logout = () => {
     }
   }
   
-  .clothing-description {
+  .recycle-description {
     font-size: 14px;
     color: #606266;
     margin-bottom: 16px;
@@ -416,7 +351,7 @@ const logout = () => {
     overflow: hidden;
   }
   
-  .clothing-actions {
+  .recycle-actions {
     display: flex;
     gap: 8px;
     
@@ -433,7 +368,7 @@ const logout = () => {
     align-items: stretch;
   }
   
-  .clothing-grid {
+  .recycle-grid {
     grid-template-columns: 1fr;
   }
   

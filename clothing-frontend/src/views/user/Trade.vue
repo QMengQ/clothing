@@ -29,12 +29,6 @@
                 title="筛选和排序"
                 class="filter-card"
               >
-                <div class="add-clothing-button">
-                  <el-button type="primary" @click="showAddClothingDialog">
-                    <el-icon><Plus /></el-icon>
-                    添加服装
-                  </el-button>
-                </div>
             <el-row :gutter="20">
               <el-col :span="6">
                 <el-form-item label="类别">
@@ -410,6 +404,43 @@
                 <div class="purchase-price">
                   <h4>价格: {{ selectedItem.price }} 元</h4>
                 </div>
+                <div class="address-info">
+                  <h4>收货地址</h4>
+                  <el-form :model="addressForm" label-position="top">
+                    <el-row :gutter="20">
+                      <el-col :span="12">
+                        <el-form-item label="收件人" prop="recipient" :rules="[{ required: true, message: '请输入收件人姓名', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.recipient" placeholder="请输入收件人姓名" />
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item label="联系电话" prop="phone" :rules="[{ required: true, message: '请输入联系电话', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.phone" placeholder="请输入联系电话" />
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                      <el-col :span="8">
+                        <el-form-item label="省份" prop="province" :rules="[{ required: true, message: '请选择省份', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.province" placeholder="请输入省份" />
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="8">
+                        <el-form-item label="城市" prop="city" :rules="[{ required: true, message: '请选择城市', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.city" placeholder="请输入城市" />
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="8">
+                        <el-form-item label="区县" prop="district" :rules="[{ required: true, message: '请选择区县', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.district" placeholder="请输入区县" />
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-form-item label="详细地址" prop="detailAddress" :rules="[{ required: true, message: '请输入详细地址', trigger: 'blur' }]">
+                      <el-input v-model="addressForm.detailAddress" type="textarea" placeholder="请输入详细地址" :rows="2" />
+                    </el-form-item>
+                  </el-form>
+                </div>
                 <div class="payment-method">
                   <h4>支付方式</h4>
                   <el-radio-group v-model="paymentMethod">
@@ -464,6 +495,43 @@
                 <div class="rental-total" v-if="rentalPeriod.length">
                   <h4>总费用: {{ calculateRentalTotal() }} 元</h4>
                 </div>
+                <div class="address-info">
+                  <h4>收货地址</h4>
+                  <el-form :model="addressForm" label-position="top">
+                    <el-row :gutter="20">
+                      <el-col :span="12">
+                        <el-form-item label="收件人" prop="recipient" :rules="[{ required: true, message: '请输入收件人姓名', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.recipient" placeholder="请输入收件人姓名" />
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="12">
+                        <el-form-item label="联系电话" prop="phone" :rules="[{ required: true, message: '请输入联系电话', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.phone" placeholder="请输入联系电话" />
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                      <el-col :span="8">
+                        <el-form-item label="省份" prop="province" :rules="[{ required: true, message: '请选择省份', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.province" placeholder="请输入省份" />
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="8">
+                        <el-form-item label="城市" prop="city" :rules="[{ required: true, message: '请选择城市', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.city" placeholder="请输入城市" />
+                        </el-form-item>
+                      </el-col>
+                      <el-col :span="8">
+                        <el-form-item label="区县" prop="district" :rules="[{ required: true, message: '请选择区县', trigger: 'blur' }]">
+                          <el-input v-model="addressForm.district" placeholder="请输入区县" />
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+                    <el-form-item label="详细地址" prop="detailAddress" :rules="[{ required: true, message: '请输入详细地址', trigger: 'blur' }]">
+                      <el-input v-model="addressForm.detailAddress" type="textarea" placeholder="请输入详细地址" :rows="2" />
+                    </el-form-item>
+                  </el-form>
+                </div>
                 <div class="payment-method">
                   <h4>支付方式</h4>
                   <el-radio-group v-model="paymentMethod">
@@ -506,7 +574,10 @@ const menuItems = [
   { index: '/user/clothing', icon: 'ShoppingBag', title: '衣物管理' },
   { index: '/user/location', icon: 'MapLocation', title: '收纳管理' },
   { index: '/user/recycle', icon: 'Refresh', title: '衣物回收' },
-  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' }
+  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' },
+  { index: '/user/orders', icon: 'ShoppingBag', title: '订单管理' },
+  { index: '/user/messages', icon: 'Message', title: '消息中心' },
+  { index: '/user/idle-alerts', icon: 'Warning', title: '闲置预警' }
 ]
 
 // 筛选和排序
@@ -596,6 +667,16 @@ const selectedConversation = ref(null)
 const newMessage = ref('')
 const paymentMethod = ref('alipay')
 const rentalPeriod = ref([])
+
+// 地址信息
+const addressForm = reactive({
+  recipient: '',
+  phone: '',
+  province: '',
+  city: '',
+  district: '',
+  detailAddress: ''
+})
 
 // 添加服装表单
 const addClothingDialogVisible = ref(false)
@@ -704,6 +785,10 @@ const loadUserData = async () => {
       if (response.data && response.data.username) {
         username.value = response.data.username
         localStorage.setItem('username', response.data.username)
+        // 保存用户ID到localStorage
+        if (response.data.id) {
+          localStorage.setItem('userId', response.data.id)
+        }
       } else {
         const user = localStorage.getItem('username')
         username.value = user || '用户'
@@ -850,8 +935,8 @@ const loadClothingList = async () => {
         price: item.price || 0,
         // 为没有rentalPrice的服装添加默认租赁价格
         rentalPrice: item.rentalPrice || 0,
-        // 默认可用性为可交易
-        availability: 'available',
+        // 使用后端返回的状态，默认为可交易
+        availability: item.status || 'available',
         owner: {
           id: item.userId || 1,
           name: item.username || ('用户' + (item.userId || 1)),
@@ -934,12 +1019,26 @@ const resetFilters = () => {
 
 // 购买商品
 const buyItem = (item) => {
+  // 检查是否是自己发布的商品
+  const userId = localStorage.getItem('userId')
+  if (item.owner && item.owner.id == userId) {
+    ElMessage.warning('不能购买自己发布的商品')
+    return
+  }
+  
   selectedItem.value = item
   buyDialogVisible.value = true
 }
 
 // 租赁商品
 const rentItem = (item) => {
+  // 检查是否是自己发布的商品
+  const userId = localStorage.getItem('userId')
+  if (item.owner && item.owner.id == userId) {
+    ElMessage.warning('不能租赁自己发布的商品')
+    return
+  }
+  
   selectedItem.value = item
   rentDialogVisible.value = true
 }
@@ -953,23 +1052,30 @@ const contactOwner = (owner) => {
 const confirmPurchase = async () => {
   if (!selectedItem.value) return
   
+  // 验证地址信息
+  if (!addressForm.recipient || !addressForm.phone || !addressForm.province || !addressForm.city || !addressForm.district || !addressForm.detailAddress) {
+    ElMessage.error('请填写完整的收货地址信息')
+    return
+  }
+  
   loading.value = true
   try {
-    const response = await fetch('/api/v1/trade', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({
-        clothingId: selectedItem.value.id,
-        tradeType: 'purchase',
-        price: selectedItem.value.price,
-        paymentMethod: paymentMethod.value
-      })
+    const response = await request.post('/api/v1/trade', {
+      clothingId: selectedItem.value.id,
+      tradeType: 'purchase',
+      price: selectedItem.value.price,
+      paymentMethod: paymentMethod.value,
+      address: {
+        recipient: addressForm.recipient,
+        phone: addressForm.phone,
+        province: addressForm.province,
+        city: addressForm.city,
+        district: addressForm.district,
+        detailAddress: addressForm.detailAddress
+      }
     })
     
-    if (response.ok) {
+    if (response) {
       ElMessage.success(`成功购买 ${selectedItem.value.title}`)
       // 更新商品状态
       const item = clothingItems.value.find(i => i.id === selectedItem.value.id)
@@ -978,6 +1084,10 @@ const confirmPurchase = async () => {
       }
       buyDialogVisible.value = false
       selectedItem.value = null
+      // 重置地址表单
+      Object.keys(addressForm).forEach(key => {
+        addressForm[key] = ''
+      })
     } else {
       ElMessage.error('购买失败，请重试')
     }
@@ -993,6 +1103,10 @@ const confirmPurchase = async () => {
     }
     buyDialogVisible.value = false
     selectedItem.value = null
+    // 重置地址表单
+    Object.keys(addressForm).forEach(key => {
+      addressForm[key] = ''
+    })
   } finally {
     loading.value = false
   }
@@ -1002,25 +1116,32 @@ const confirmPurchase = async () => {
 const confirmRental = async () => {
   if (!selectedItem.value || !rentalPeriod.value.length) return
   
+  // 验证地址信息
+  if (!addressForm.recipient || !addressForm.phone || !addressForm.province || !addressForm.city || !addressForm.district || !addressForm.detailAddress) {
+    ElMessage.error('请填写完整的收货地址信息')
+    return
+  }
+  
   loading.value = true
   try {
-    const response = await fetch('/api/v1/trade', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({
-        clothingId: selectedItem.value.id,
-        tradeType: 'rental',
-        price: calculateRentalTotal(),
-        rentalStartDate: rentalPeriod.value[0],
-        rentalEndDate: rentalPeriod.value[1],
-        paymentMethod: paymentMethod.value
-      })
+    const response = await request.post('/api/v1/trade', {
+      clothingId: selectedItem.value.id,
+      tradeType: 'rental',
+      price: calculateRentalTotal(),
+      rentalStartDate: rentalPeriod.value[0],
+      rentalEndDate: rentalPeriod.value[1],
+      paymentMethod: paymentMethod.value,
+      address: {
+        recipient: addressForm.recipient,
+        phone: addressForm.phone,
+        province: addressForm.province,
+        city: addressForm.city,
+        district: addressForm.district,
+        detailAddress: addressForm.detailAddress
+      }
     })
     
-    if (response.ok) {
+    if (response) {
       ElMessage.success(`成功租赁 ${selectedItem.value.title}`)
       // 更新商品状态
       const item = clothingItems.value.find(i => i.id === selectedItem.value.id)
@@ -1030,6 +1151,10 @@ const confirmRental = async () => {
       rentDialogVisible.value = false
       selectedItem.value = null
       rentalPeriod.value = []
+      // 重置地址表单
+      Object.keys(addressForm).forEach(key => {
+        addressForm[key] = ''
+      })
     } else {
       ElMessage.error('租赁失败，请重试')
     }
@@ -1046,6 +1171,10 @@ const confirmRental = async () => {
     rentDialogVisible.value = false
     selectedItem.value = null
     rentalPeriod.value = []
+    // 重置地址表单
+    Object.keys(addressForm).forEach(key => {
+      addressForm[key] = ''
+    })
   } finally {
     loading.value = false
   }
@@ -1402,12 +1531,15 @@ const checkRecycleToTradeData = () => {
 /* 消息界面 */
 .message-container {
   display: flex;
-  height: 500px;
+  width: 100%;
+  max-height: 500px;
+  overflow: hidden;
   
   .message-sidebar {
     width: 300px;
     border-right: 1px solid #ebeef5;
     overflow-y: auto;
+    max-height: 500px;
     
     .conversation-item {
       display: flex;
@@ -1465,6 +1597,7 @@ const checkRecycleToTradeData = () => {
     flex: 1;
     display: flex;
     flex-direction: column;
+    max-height: 500px;
     
     .thread-header {
       display: flex;
@@ -1488,6 +1621,7 @@ const checkRecycleToTradeData = () => {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      max-height: 350px;
       
       .message {
         display: flex;
@@ -1517,6 +1651,11 @@ const checkRecycleToTradeData = () => {
         .message-bubble {
           padding: 10px 14px;
           margin-bottom: 4px;
+          word-wrap: break-word;
+          word-break: break-all;
+          white-space: normal;
+          max-width: 100%;
+          box-sizing: border-box;
         }
         
         .message-time {
@@ -1532,9 +1671,20 @@ const checkRecycleToTradeData = () => {
       border-top: 1px solid #ebeef5;
       display: flex;
       gap: 12px;
+      align-items: center;
+      height: 80px;
+      box-sizing: border-box;
       
       .el-input {
         flex: 1;
+        
+        .el-input__wrapper {
+          min-height: 40px;
+        }
+      }
+      
+      .el-button {
+        height: 40px;
       }
     }
     
@@ -1544,6 +1694,57 @@ const checkRecycleToTradeData = () => {
       align-items: center;
       justify-content: center;
       color: #909399;
+      max-height: 350px;
+    }
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .message-container {
+    flex-direction: column;
+    height: 80vh;
+    
+    .message-sidebar {
+      width: 100%;
+      height: 200px;
+      border-right: none;
+      border-bottom: 1px solid #ebeef5;
+    }
+    
+    .message-content {
+      flex: 1;
+      
+      .message-list {
+        .message {
+          max-width: 85%;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .message-container {
+    height: 70vh;
+    
+    .message-content {
+      .message-list {
+        padding: 12px;
+        gap: 12px;
+        
+        .message {
+          max-width: 90%;
+          
+          .message-bubble {
+            padding: 8px 12px;
+          }
+        }
+      }
+      
+      .message-input {
+        padding: 12px;
+      }
     }
   }
 }

@@ -255,4 +255,28 @@ public class RecycleController {
         int lastDotIndex = filename.lastIndexOf('.');
         return lastDotIndex > 0 ? filename.substring(lastDotIndex + 1) : "jpg";
     }
+
+    // 管理员接口：获取待审核的回收列表
+    @GetMapping("/admin/pending")
+    public List<RecycleItem> getPendingRecycleItems() {
+        return repository.findByStatus("待审核");
+    }
+
+    // 管理员接口：批准回收项
+    @PutMapping("/admin/approve/{id}")
+    public RecycleItem approveRecycleItem(@PathVariable Long id) {
+        RecycleItem item = repository.findById(id).orElseThrow();
+        item.setStatus("已批准");
+        item.setUpdatedAt(LocalDateTime.now());
+        return repository.save(item);
+    }
+
+    // 管理员接口：拒绝回收项
+    @PutMapping("/admin/reject/{id}")
+    public RecycleItem rejectRecycleItem(@PathVariable Long id) {
+        RecycleItem item = repository.findById(id).orElseThrow();
+        item.setStatus("已拒绝");
+        item.setUpdatedAt(LocalDateTime.now());
+        return repository.save(item);
+    }
 }

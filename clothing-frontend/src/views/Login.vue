@@ -102,6 +102,7 @@ const login = async () => {
           localStorage.setItem('token', res.data.token)
           localStorage.setItem('role', res.data.role)
           localStorage.setItem('username', res.data.username || form.username)
+          localStorage.setItem('userId', res.data.id || res.data.userId)
           
           ElMessage.success('登录成功')
           

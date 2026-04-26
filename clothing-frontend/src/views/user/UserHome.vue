@@ -86,6 +86,56 @@
                 </div>
               </Card>
             </el-col>
+            <el-col :span="6">
+              <Card
+                class="action-card"
+                @click="navigateTo('/user/trade')"
+              >
+                <div class="action-content">
+                  <el-icon class="action-icon"><ShoppingBag /></el-icon>
+                  <h4>服装交易</h4>
+                  <p>买卖和租赁服装</p>
+                </div>
+              </Card>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20" class="quick-actions" style="margin-top: 20px;">
+            <el-col :span="6">
+              <Card
+                class="action-card"
+                @click="navigateTo('/user/orders')"
+              >
+                <div class="action-content">
+                  <el-icon class="action-icon"><ShoppingBag /></el-icon>
+                  <h4>订单管理</h4>
+                  <p>查看和管理您的订单</p>
+                </div>
+              </Card>
+            </el-col>
+            <el-col :span="6">
+              <Card
+                class="action-card"
+                @click="navigateTo('/user/messages')"
+              >
+                <div class="action-content">
+                  <el-icon class="action-icon"><Message /></el-icon>
+                  <h4>消息中心</h4>
+                  <p>查看和发送消息</p>
+                </div>
+              </Card>
+            </el-col>
+            <el-col :span="6">
+              <Card
+                class="action-card"
+                @click="navigateTo('/user/idle-alerts')"
+              >
+                <div class="action-content">
+                  <el-icon class="action-icon"><Warning /></el-icon>
+                  <h4>闲置预警</h4>
+                  <p>查看闲置衣物提醒</p>
+                </div>
+              </Card>
+            </el-col>
           </el-row>
         </el-main>
       </el-container>
@@ -97,7 +147,7 @@
 import { ref, onMounted, onActivated, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { House, ShoppingBag, MapLocation, Refresh } from '@element-plus/icons-vue'
+import { House, ShoppingBag, MapLocation, Refresh, Message, Warning } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import Sidebar from '../../components/Sidebar.vue'
 import Card from '../../components/Card.vue'
@@ -112,7 +162,10 @@ const menuItems = [
   { index: '/user/clothing', icon: 'ShoppingBag', title: '衣物管理' },
   { index: '/user/location', icon: 'MapLocation', title: '收纳管理' },
   { index: '/user/recycle', icon: 'Refresh', title: '衣物回收' },
-  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' }
+  { index: '/user/trade', icon: 'ShoppingBag', title: '服装交易' },
+  { index: '/user/orders', icon: 'ShoppingBag', title: '订单管理' },
+  { index: '/user/messages', icon: 'Message', title: '消息中心' },
+  { index: '/user/idle-alerts', icon: 'Warning', title: '闲置预警' }
 ]
 
 const stats = ref([
@@ -272,47 +325,48 @@ const handleResize = () => {
 
 const loadStats = async () => {
   try {
-    // 从API加载统计数据
-    // 尝试使用POST方法，因为GET方法返回405
-    const res = await request.post('/clothing/stats')
-    if (res.data) {
-      stats.value = [
-        { label: '总衣物数', value: res.data.total || 0 },
-        { label: '已收纳', value: res.data.stored || 0 },
-        { label: '待处理', value: res.data.pending || 0 },
-        { label: '回收数', value: res.data.recycled || 0 }
-      ]
+    // 尝试从衣物列表计算统计数据
+    const clothingRes = await request.get('/clothing/my')
+    let total = 0
+    let stored = 0
+    let pending = 0
+    let recycled = 0
+    
+    if (Array.isArray(clothingRes.data)) {
+      const clothingList = clothingRes.data
+      total = clothingList.length
+      stored = clothingList.filter(item => item.location).length
     }
+    
+    // 从回收API获取回收项数据
+    try {
+      const recycleRes = await request.get('/recycle/my')
+      if (Array.isArray(recycleRes.data)) {
+        const recycleList = recycleRes.data
+        // 待处理：状态为"待审核"的回收项
+        pending = recycleList.filter(item => item.status === '待审核').length
+        // 回收数：状态为"已批准"的回收项
+        recycled = recycleList.filter(item => item.status === '已批准').length
+      }
+    } catch (recycleError) {
+      console.error('加载回收列表失败:', recycleError)
+    }
+    
+    stats.value = [
+      { label: '总衣物数', value: total },
+      { label: '已收纳', value: stored },
+      { label: '待处理', value: pending },
+      { label: '回收数', value: recycled }
+    ]
   } catch (error) {
     console.error('加载统计数据失败:', error)
-    // 尝试从衣物列表计算统计数据
-    try {
-      const clothingRes = await request.get('/clothing/my')
-      if (Array.isArray(clothingRes.data)) {
-        const clothingList = clothingRes.data
-        const total = clothingList.length
-        const stored = clothingList.filter(item => item.location).length
-        const pending = clothingList.filter(item => !item.location).length
-        // 这里简化处理，实际应该从回收API获取
-        const recycled = 0
-        
-        stats.value = [
-          { label: '总衣物数', value: total },
-          { label: '已收纳', value: stored },
-          { label: '待处理', value: pending },
-          { label: '回收数', value: recycled }
-        ]
-      }
-    } catch (clothingError) {
-      console.error('加载衣物列表失败:', clothingError)
-      // 使用默认值
-      stats.value = [
-        { label: '总衣物数', value: 0 },
-        { label: '已收纳', value: 0 },
-        { label: '待处理', value: 0 },
-        { label: '回收数', value: 0 }
-      ]
-    }
+    // 使用默认值
+    stats.value = [
+      { label: '总衣物数', value: 0 },
+      { label: '已收纳', value: 0 },
+      { label: '待处理', value: 0 },
+      { label: '回收数', value: 0 }
+    ]
   }
   // 更新图表
   updateCharts()
