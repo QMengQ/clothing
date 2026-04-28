@@ -5,7 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
 public class Message {
@@ -22,7 +22,7 @@ public class Message {
 
     @jakarta.persistence.PrePersist
     protected void onCreate() {
-        createdAt = new Date(System.currentTimeMillis());
+        createdAt = new Date();
     }
 
     // Getters and Setters

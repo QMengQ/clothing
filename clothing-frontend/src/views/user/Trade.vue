@@ -829,7 +829,7 @@ const loadClothingList = async () => {
           owner: {
             id: 101,
             name: '12342',
-            avatar: 'https://picsum.photos/seed/fashion-person/100/100'
+            avatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square'
           }
         },
         {
@@ -846,7 +846,7 @@ const loadClothingList = async () => {
           owner: {
             id: 102,
             name: '2424242',
-            avatar: 'https://picsum.photos/seed/professional/100/100'
+            avatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square'
           }
         },
         {
@@ -863,7 +863,7 @@ const loadClothingList = async () => {
           owner: {
             id: 103,
             name: '123456',
-            avatar: 'https://picsum.photos/seed/artistic/100/100'
+            avatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square'
           }
         },
         {
@@ -880,7 +880,7 @@ const loadClothingList = async () => {
           owner: {
             id: 104,
             name: '1234567',
-            avatar: 'https://picsum.photos/seed/sporty/100/100'
+            avatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square'
           }
         },
         {
@@ -897,7 +897,7 @@ const loadClothingList = async () => {
           owner: {
             id: 105,
             name: '12345678',
-            avatar: 'https://picsum.photos/seed/trendy/100/100'
+            avatar: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square'
           }
         }
       ]
@@ -940,7 +940,7 @@ const loadClothingList = async () => {
         owner: {
           id: item.userId || 1,
           name: item.username || ('用户' + (item.userId || 1)),
-          avatar: `https://picsum.photos/seed/user${item.userId || 1}/100/100`
+          avatar: `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square`
         }
       }))
     }

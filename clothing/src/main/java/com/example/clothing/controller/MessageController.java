@@ -47,7 +47,7 @@ public class MessageController {
                     Map<String, Object> conversation = new HashMap<>();
                     conversation.put("id", otherUserId);
                     conversation.put("name", otherUser.getUsername());
-                    conversation.put("avatar", "https://picsum.photos/seed/" + otherUser.getUsername() + "/100/100");
+                    conversation.put("avatar", "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=user%20avatar%2C%20minimalist%2C%20friendly%20face&image_size=square");
                     conversation.put("lastMessage", message.getContent());
                     conversation.put("time", message.getCreatedAt());
                     conversation.put("unread", message.getReceiverId().equals(userId) && message.getStatus().equals("sent") ? 1 : 0);

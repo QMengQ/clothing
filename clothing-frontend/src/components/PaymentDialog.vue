@@ -3,16 +3,16 @@
     v-model="dialogVisible"
     title="支付订单"
     width="500px"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
+    :close-on-click-modal="true"
+    :close-on-press-escape="true"
   >
-    <div class="payment-container">
+    <div class="payment-container" v-if="order && order.id">
       <!-- 订单信息 -->
       <div class="order-info">
         <h3>订单信息</h3>
         <p>订单号: {{ order.id }}</p>
-        <p>商品: {{ order.clothing.title }}</p>
-        <p>金额: ¥{{ order.price.toFixed(2) }}</p>
+        <p>商品: {{ order.clothing?.title || '未知' }}</p>
+        <p>金额: ¥{{ order.price?.toFixed(2) || '0.00' }}</p>
       </div>
 
       <!-- 支付方式选择 -->
@@ -49,11 +49,21 @@
     </div>
 
     <template #footer>
-      <span class="dialog-footer" v-if="paymentStatus === 'init'">
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmPayment" :loading="confirmLoading">
-          确认支付
-        </el-button>
+      <span class="dialog-footer">
+        <span v-if="paymentStatus === 'init'">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmPayment" :loading="confirmLoading">
+            确认支付
+          </el-button>
+        </span>
+        <span v-else-if="paymentStatus === 'success'">
+          <el-button type="primary" @click="dialogVisible = false">
+            关闭
+          </el-button>
+        </span>
+        <span v-else>
+          <el-button @click="dialogVisible = false">取消</el-button>
+        </span>
       </span>
     </template>
   </el-dialog>
@@ -132,27 +142,14 @@ const confirmPayment = async () => {
   paymentStatus.value = 'processing'
 
   try {
-    // 模拟支付处理
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
     // 调用后端支付接口
     const response = await request.put(`/api/v1/orders/${props.order.id}/pay`, {
       paymentMethod: selectedPaymentMethod.value
     })
 
-    if (response.status === 200) {
-      paymentStatus.value = 'success'
-      ElMessage.success('支付成功')
-      
-      // 延迟关闭对话框，让用户看到成功信息
-      setTimeout(() => {
-        dialogVisible.value = false
-        emit('payment-success')
-      }, 1500)
-    } else {
-      paymentStatus.value = 'failed'
-      ElMessage.error('支付失败，请重试')
-    }
+    paymentStatus.value = 'success'
+    ElMessage.success('支付成功')
+    emit('payment-success')
   } catch (error) {
     console.error('支付失败:', error)
     paymentStatus.value = 'failed'

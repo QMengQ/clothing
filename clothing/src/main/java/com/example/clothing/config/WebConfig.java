@@ -30,7 +30,12 @@ public class WebConfig implements WebMvcConfigurer {
         // 配置JWT拦截器
         registry.addInterceptor(jwtInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/user/login", "/user/register", "/uploads/**", "/api/v1/idle-alerts/test-scan/**", "/api/v1/idle-alerts/test-create");
+                .excludePathPatterns("/user/login", "/user/register", "/uploads/**", 
+                    "/api/v1/idle-alerts/test-scan/**", 
+                    "/api/v1/idle-alerts/test-create", 
+                    "/api/v1/idle-alerts/force-scan/**", 
+                    "/api/v1/idle-alerts/force-scan-user4", 
+                    "/api/v1/idle-alerts/debug/**");
     }
 
     @Override

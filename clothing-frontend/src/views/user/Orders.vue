@@ -381,8 +381,11 @@ const payOrder = (order) => {
 // 支付成功回调
 const handlePaymentSuccess = () => {
   paymentDialogVisible.value = false
-  currentOrder.value = null
-  loadOrders()
+  // 延迟一点时间再清空，避免渲染错误
+  setTimeout(() => {
+    currentOrder.value = null
+    loadOrders()
+  }, 100)
 }
 
 // 取消订单

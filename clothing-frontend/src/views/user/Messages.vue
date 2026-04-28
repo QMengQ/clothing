@@ -296,7 +296,15 @@ const getConversationAvatar = (conversation) => {
 
 // 格式化时间
 const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
+  // 处理可能的日期字符串或时间戳
+  let date
+  if (typeof timestamp === 'string') {
+    // 如果是日期字符串，确保正确解析
+    date = new Date(timestamp.replace(' ', 'T'))
+  } else {
+    date = new Date(timestamp)
+  }
+  
   const now = new Date()
   const diff = now - date
   

@@ -57,18 +57,20 @@
             <div ref="categoryChartRef" class="chart-container"></div>
           </Card>
 
-          <!-- 预警列表 -->
-          <Card class="alerts-card">
-            <template #header>
-              <div class="card-header">
-                <span>待处理预警 ({{ pendingAlerts.length }})</span>
-                <el-button type="primary" @click="scanIdleClothing">
-                  <el-icon><Refresh /></el-icon>
-                  扫描闲置衣物
-                </el-button>
-              </div>
-            </template>
+          <!-- 扫描按钮区域 -->
+          <div class="scan-section">
+            <el-button type="primary" size="large" @click="scanIdleClothing" style="margin-bottom: 20px;">
+              <el-icon><Refresh /></el-icon>
+              扫描闲置衣物
+            </el-button>
+            <el-button type="default" @click="reloadData">
+              <el-icon><Refresh /></el-icon>
+              刷新数据
+            </el-button>
+          </div>
 
+          <!-- 预警列表 -->
+          <Card class="alerts-card" title="待处理预警">
             <div v-if="loading" class="loading-container">
               <el-spinner size="large" />
               <p>加载中...</p>
@@ -93,7 +95,7 @@
                   <div class="alert-meta">
                     <span class="meta-item"><strong>类别:</strong> {{ alert.clothingCategory }}</span>
                     <span class="meta-item"><strong>最后穿着:</strong> {{ formatDate(alert.lastWearDate) }}</span>
-                    <span v-if="alert.exceptionRule" class="meta-item"><strong>例外规则:</strong> {{ alert.exceptionRule }}</span>
+                    <span v-if="alert.exceptionRule" class="meta-item"><strong>季节:</strong> {{ alert.exceptionRule }}</span>
                   </div>
                   <div class="alert-actions">
                     <el-button type="primary" @click="viewClothing(alert.clothingId)">
@@ -223,12 +225,17 @@ const loadAlerts = async () => {
   loading.value = true
   try {
     // 获取所有预警
+    console.log('开始加载预警数据...')
     const response = await request.get('/api/v1/idle-alerts/all')
+    console.log('预警API响应:', response)
     const allAlerts = response.data || []
+    console.log('所有预警数据:', allAlerts)
     
     // 分离待处理和历史预警
     pendingAlerts.value = allAlerts.filter(alert => alert.status === 'pending')
     historyAlerts.value = allAlerts.filter(alert => alert.status !== 'pending')
+    console.log('待处理预警:', pendingAlerts.value)
+    console.log('历史预警:', historyAlerts.value)
   } catch (error) {
     console.error('加载预警失败:', error)
     ElMessage.error('加载预警失败')
@@ -248,8 +255,15 @@ const loadStats = async () => {
   }
 }
 
+const reloadData = () => {
+  console.log('刷新数据中...')
+  loadAlerts()
+  loadStats()
+}
+
 const scanIdleClothing = async () => {
   try {
+    console.log('开始扫描闲置衣物...')
     await request.post('/api/v1/idle-alerts/scan')
     ElMessage.success('扫描完成')
     // 重新加载数据

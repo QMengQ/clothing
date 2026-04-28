@@ -3,6 +3,7 @@ import com.example.clothing.entity.Clothing;
 import com.example.clothing.entity.Image;
 import com.example.clothing.repository.ClothingRepository;
 import com.example.clothing.repository.ImageRepository;
+import com.example.clothing.service.IdleClothingAlertService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,9 @@ public class ClothingController {
 
     @Autowired
     private ImageRepository imageRepository;
+    
+    @Autowired
+    private IdleClothingAlertService idleClothingAlertService;
 
     // 图片存储目录
     @Value("${upload.dir:C:/Users/ASUS/Desktop/clothing-frontend/clothing/uploads}")
@@ -284,7 +288,9 @@ public class ClothingController {
                 logger.info("没有上传图片");
             }
 
-            logger.info("衣物添加成功，返回结果");
+            logger.info("衣物添加成功，开始扫描闲置预警");
+            idleClothingAlertService.scanIdleClothing(userId);
+            logger.info("闲置预警扫描完成");
             return ResponseEntity.ok(savedClothing);
         } catch (IOException e) {
             logger.error("文件上传失败", e);
@@ -505,7 +511,9 @@ public class ClothingController {
                 logger.info("没有上传新图片，保持原图片");
             }
 
-            logger.info("衣物更新成功，返回结果");
+            logger.info("衣物更新成功，开始扫描闲置预警");
+            idleClothingAlertService.scanIdleClothing(userId);
+            logger.info("闲置预警扫描完成");
             return ResponseEntity.ok(savedClothing);
         } catch (IOException e) {
             logger.error("文件上传失败", e);
@@ -560,6 +568,10 @@ public class ClothingController {
             
             // 保存衣物
             Clothing savedClothing = repository.save(clothing);
+            
+            logger.info("衣物保存成功，开始扫描闲置预警");
+            idleClothingAlertService.scanIdleClothing(userId);
+            logger.info("闲置预警扫描完成");
             
             return ResponseEntity.ok(savedClothing);
         } catch (Exception e) {
